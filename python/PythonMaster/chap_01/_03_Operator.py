@@ -1,0 +1,7 @@
+print( 15 + 7 )
+print( 15 - 7 )
+print( 15 * 7 )
+print( 15 ** 2 )
+print( 15 / 7 )
+print( 15 // 7 )
+print( 15 % 7 )

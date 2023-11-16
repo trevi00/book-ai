@@ -1,0 +1,134 @@
+python tip
+
+123_456_789
+라고 쓰면 _를 무시함 (가독성을 위해서 사용)
+
+len()
+리스트 안의 항목의 개수 = len(리스트)
+
+type()를 사용하여 데이터 형식 확인 가능
+
+str() 문자열로 변환함
+
+float 실수로 변환
+
+int 정수로 변환
+
+_A : 외부에서 쓰지 말자 근데 외부에서 바꿀수는 있음
+__A : 외부에서 쓰지 말자 외부에서 바꿀수도 없음
+그니까 호출하려면 getter로 함수로 return _A를 해서
+외부에서 getter로 지정한 함수로 호출해서 바꾸진 말고 나타내자.(_, __) 
+ex) def getName(self): 
+	   return self._name
+호출시 ex) tom.getName()
+외부에서 바꾸고 싶다면 setter로 지정한 함수로 호출해서 바꾸자. (_)
+ex) def setName(self, value): 
+	   self._name = value
+호출시 ex) tom.setName()
+property라는 더 우아한 방법이 있다.
+@property
+def Name(self):
+	return self._name
+@Name.setter
+def Name(self, value):
+	self._name=value
+이러면 데이터 필드처럼 이름으로 사용할 수가 있음 괄호 안붙여도됨 ex) tom.Name
+
+상속
+슈퍼클래스
+ex) class super:
+서브 클래스
+ex) class sup(super):
+
+메소드 오버라이딩 (슈퍼 - 서브 관계)
+ex) 
+class super:
+	def _superMethod(self):
+		print("슈퍼클래스의 메서드")
+	def superMethod(self):
+		self._superMethod()
+class sup(super):
+	def superMethod(self):
+		super()._superMethod()
+
+__init__ / super()
+class X:
+	def __init__(self, a):
+	self.a=a
+class Y(X):
+	def __init__(self, a, b):
+	self.b=b
+	super().__init__(a)
+class Z(Y):
+	def __init__(self, a):
+	self.c=c
+	super().__init__(a, b)
+
+metaclass
+type('클래스 이름', 기반 클래스 튜플, 속성 메서드 딕셔너리)
+
+ex)
+def replace(self, old, new):
+	while old in self:
+		self[self.index(old)]=new
+Newlist = type('NewList', (list, ), { 'descrition': 'list fix', 'replace' : replace})
+list1 = NewList([10, 20, 30, 40, 50, 60])
+list1.replace(30, 25)
+print(list1)
+print(list1.descrition)
+
+추상클래스 abc.ABCMeta (pass써서 sub에서 오버라이딩 하도록 쓰는게 일반적)
+ex)
+from abc import *
+class 추상클래스이름(metaclass = ABCMeta):
+@abstractmethod
+def 메서드이름(self):
+	코드
+
+open[path, "??"]
+w : 파일을 지우고 만듬
+r : 읽기를 위해서만
+a : 더함 append
+
+
++ 덧셈
+- 뺄셈
+* 곱셈
+/ 나눗셈
+// 몫
+% 나머지
+** 승
+()  지수  곱셈 나눗셈  덧셈 뺄셈 순으로 계산하는거 아시죠?
+
+calculation_function = operations['연산자']
+calculation_function(op1, op2)
+
+f-string
+f"~~{변수}"
+>>~~변수의 내용
+
+
+연산자
+and 둘다 맞아야 True
+or 둘중에 하나라도 맞아야 True
+not 틀려야 True
+
+
+모듈 random
+
+random.randint(시작지점, 끝지점)
+난수 생성기
+
+for 변수 in 리스트
+자바의 foreach문과 같음 (리스트의 모든 요소 보여줌)
+
+for 변수 in range(a, b)
+변수가 a부터 b까지 증가
+
+절차형 코딩시 함수형으로 바꿀 생각을 하며 코딩함
+함수형으로 코딩하며 객체를 생성할 생각도 해야함
+
+dictionaries 딕셔너리
+딕셔너리 = {key: value}
+print(딕셔너리[key])
+>>value
