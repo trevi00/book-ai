@@ -1,0 +1,180 @@
+-- BookAI 데이터베이스 초기 스키마
+-- 응집도와 결합도를 고려한 테이블 설계
+
+-- 1. 사용자 테이블
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    nickname VARCHAR(30),
+    role ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
+    status ENUM('ACTIVE', 'INACTIVE', 'LOCKED', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_username (username),
+    INDEX idx_email (email),
+    INDEX idx_status (status)
+);
+
+-- 2. 도서 테이블
+CREATE TABLE books (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    isbn VARCHAR(13) NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    publisher VARCHAR(100),
+    publication_year INT,
+    genre ENUM(
+        'NOVEL', 'FANTASY', 'MYSTERY', 'ROMANCE',
+        'TECHNICAL', 'COMPUTER_SCIENCE', 'PROGRAMMING',
+        'ESSAY', 'BIOGRAPHY', 'HISTORY', 'SCIENCE',
+        'PHILOSOPHY', 'BUSINESS', 'SELF_HELP', 'HEALTH',
+        'TRAVEL', 'COOKING', 'ART', 'EDUCATION', 'OTHER'
+    ) NOT NULL,
+    description TEXT,
+    cover_image_url VARCHAR(500),
+    total_pages INT,
+    rating DECIMAL(3,2) DEFAULT 0.00,
+    rating_count INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_isbn (isbn),
+    INDEX idx_title (title),
+    INDEX idx_author (author),
+    INDEX idx_genre (genre),
+    INDEX idx_rating (rating)
+);
+
+-- 3. 독서 세션 테이블 (임시저장 기능)
+CREATE TABLE reading_sessions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    book_id BIGINT NOT NULL,
+    current_page INT DEFAULT 0,
+    total_pages INT,
+    reading_notes TEXT,
+    status ENUM('READING', 'PAUSED', 'COMPLETED') NOT NULL DEFAULT 'READING',
+    started_at TIMESTAMP,
+    last_read_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_book_id (book_id),
+    INDEX idx_status (status),
+    INDEX idx_last_read_at (last_read_at),
+    UNIQUE KEY unique_user_book_active (user_id, book_id, status)
+);
+
+-- 4. 독서 완료 기록 테이블
+CREATE TABLE reading_records (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    book_id BIGINT NOT NULL,
+    reading_session_id BIGINT,
+    user_content TEXT NOT NULL,
+    reading_type ENUM('REVIEW', 'TECHNICAL') NOT NULL,
+    rating DECIMAL(3,2),
+    is_public BOOLEAN DEFAULT FALSE,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE,
+    FOREIGN KEY (reading_session_id) REFERENCES reading_sessions(id) ON DELETE SET NULL,
+    INDEX idx_user_id (user_id),
+    INDEX idx_book_id (book_id),
+    INDEX idx_reading_type (reading_type),
+    INDEX idx_completed_at (completed_at),
+    INDEX idx_is_public (is_public)
+);
+
+-- 5. AI 분석 결과 테이블
+CREATE TABLE ai_analysis_results (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    reading_record_id BIGINT NOT NULL,
+    analysis_type ENUM('REVIEW', 'TECHNICAL') NOT NULL,
+    
+    -- 독후감 분석 결과
+    emotion VARCHAR(50),
+    emotion_confidence DECIMAL(3,2),
+    emotion_details TEXT,
+    empathy_response TEXT,
+    improved_content TEXT,
+    
+    -- 기술서적 분석 결과
+    technical_concept VARCHAR(200),
+    technical_explanation TEXT,
+    technical_examples JSON,
+    best_practices JSON,
+    related_concepts JSON,
+    learning_path JSON,
+    
+    analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (reading_record_id) REFERENCES reading_records(id) ON DELETE CASCADE,
+    INDEX idx_reading_record_id (reading_record_id),
+    INDEX idx_analysis_type (analysis_type),
+    INDEX idx_analyzed_at (analyzed_at)
+);
+
+-- 6. 도서 추천 테이블
+CREATE TABLE book_recommendations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    analysis_result_id BIGINT,
+    user_id BIGINT NOT NULL,
+    recommended_book_title VARCHAR(200) NOT NULL,
+    recommended_book_author VARCHAR(100) NOT NULL,
+    recommendation_reason TEXT NOT NULL,
+    similarity_score DECIMAL(3,2),
+    is_clicked BOOLEAN DEFAULT FALSE,
+    is_purchased BOOLEAN DEFAULT FALSE,
+    recommended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (analysis_result_id) REFERENCES ai_analysis_results(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_analysis_result_id (analysis_result_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_similarity_score (similarity_score),
+    INDEX idx_recommended_at (recommended_at)
+);
+
+-- 7. 사용자 선호도 테이블
+CREATE TABLE user_preferences (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    preferred_genres JSON,
+    preferred_authors JSON,
+    reading_goal_per_month INT DEFAULT 0,
+    favorite_reading_time ENUM('MORNING', 'AFTERNOON', 'EVENING', 'NIGHT'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_preference (user_id)
+);
+
+-- 8. 독서 통계 테이블 (캐시용)
+CREATE TABLE reading_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    year INT NOT NULL,
+    month INT NOT NULL,
+    books_completed INT DEFAULT 0,
+    total_pages_read INT DEFAULT 0,
+    total_reading_time_minutes INT DEFAULT 0,
+    favorite_genre VARCHAR(50),
+    average_rating DECIMAL(3,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_month_stats (user_id, year, month),
+    INDEX idx_user_year_month (user_id, year, month)
+);

@@ -1,0 +1,9 @@
+-- Clean up test data
+SET REFERENTIAL_INTEGRITY FALSE;
+
+DELETE FROM ai_analyses;
+DELETE FROM reading_records;
+DELETE FROM books;
+DELETE FROM users;
+
+SET REFERENTIAL_INTEGRITY TRUE;
