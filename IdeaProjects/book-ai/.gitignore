@@ -1,0 +1,143 @@
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+bower_components/
+
+# Build directories
+build/
+dist/
+.next/
+out/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.prod
+.env.demo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+test_env/
+ENV/
+env.bak/
+venv.bak/
+.pytest_cache/
+*.egg-info/
+
+# Test files (keep only essential ones)
+*test*.py
+test_*.py
+*_test.py
+*Test.java
+*Tests.java
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+target/
+.gradle/
+build/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+chroma.sqlite3
+
+# Cache and temporary files
+.cache/
+.temp/
+.tmp/
+*.tmp
+*.temp
+nul
+
+# Vector database
+data/vector_db/
+data/embeddings/
+
+# Documentation that's not part of core project
+studyDocs/
+libStudyDocs/
+docs/
+sample-*.md
+extended-*.md
+*-sample-*.md
+
+# Mobile app build
+mobile-app/android/
+mobile-app/ios/
+mobile-app/.expo/
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# Gradle Wrapper
+gradle/wrapper/gradle-wrapper.jar
+
+# Package Files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Virtual machine crash logs
+hs_err_pid*
